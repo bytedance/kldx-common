@@ -8,6 +8,7 @@ import (
 	"code.byted.org/apaas/goapi_common/utils"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -73,6 +74,9 @@ func (c *HttpClient) doRequest(req *http.Request, headers map[string][]string, m
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
 	}
+
+	logid, _ := resp.Header[constants.HttpHeaderKey_Logid]
+	fmt.Printf("logid: %s\n", logid)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, exceptions.InternalError("doRequest failed: statusCode is %d", resp.StatusCode)
