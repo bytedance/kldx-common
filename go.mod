@@ -1,3 +1,3 @@
-module code.byted.org/apaas/goapi_common
+module github.com/kldx/common
 
 go 1.16

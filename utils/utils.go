@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"code.byted.org/apaas/goapi_common/conf"
-	"code.byted.org/apaas/goapi_common/constants"
-	"code.byted.org/apaas/goapi_common/structs"
+	"github.com/kldx/common/conf"
+	"github.com/kldx/common/constants"
+	"github.com/kldx/common/structs"
 	"fmt"
 )
 
