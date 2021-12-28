@@ -1,11 +1,11 @@
 package http
 
 import (
-	"code.byted.org/apaas/goapi_common/constants"
-	"code.byted.org/apaas/goapi_common/exceptions"
-	"code.byted.org/apaas/goapi_common/structs"
-	"code.byted.org/apaas/goapi_common/utils"
 	"encoding/json"
+	"github.com/kldx/common/constants"
+	"github.com/kldx/common/exceptions"
+	"github.com/kldx/common/structs"
+	"github.com/kldx/common/utils"
 	"net/http"
 	"sync"
 	"sync/atomic"
