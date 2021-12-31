@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/bytedance/kldx-common/constants"
 	"github.com/bytedance/kldx-common/exceptions"
 	"github.com/bytedance/kldx-common/structs"
@@ -14,8 +15,8 @@ import (
 
 var (
 	appToken           atomic.Value
-	appTokenExpireTime atomic.Value
-	tokenRemainingTime int64 = 600 // 10min
+	appTokenExpireTime atomic.Value // 单位 s
+	tokenRemainingTime int64 = 1200 // 单位 s，20min
 )
 
 type ReqMiddleWare func(req *http.Request) error
@@ -58,7 +59,7 @@ func getAppTokenFromMem() string {
 		return ""
 	}
 
-	// token 为空 或 10分钟内过期，不再使用
+	// token 为空 或 20分钟内过期，不再使用
 	if expireTime-time.Now().Unix() < tokenRemainingTime || token == "" {
 		return ""
 	}
@@ -79,7 +80,10 @@ func refreshAppToken() (string, error) {
 	}
 
 	// 3.refresh token
-	appid, secret := utils.GetAppidAndSecret()
+	appid, secret, err := utils.GetAppidAndSecret()
+	if err != nil {
+		return "", fmt.Errorf("refresh app token err: %s", err.Error())
+	}
 	data := map[string]string{
 		"clientId":     appid,
 		"clientSecret": secret,
@@ -96,11 +100,15 @@ func refreshAppToken() (string, error) {
 		return "", exceptions.InternalError("unmarshal OpenapiTokenResult failed, err: %v", err)
 	}
 
+	if tokenResult.Code != "0" {
+		return "", exceptions.InternalError("refresh app token failed, code: %v, msg: %v", tokenResult.Code, tokenResult.Msg)
+	}
+
 	if tokenResult.Data.AccessToken == "" {
 		return "", exceptions.InternalError("openapi accessToken is empty")
 	}
 
 	appToken.Store(tokenResult.Data.AccessToken)
-	appTokenExpireTime.Store(tokenResult.Data.ExpireTime)
+	appTokenExpireTime.Store(tokenResult.Data.ExpireTime / 1000)
 	return tokenResult.Data.AccessToken, nil
 }
