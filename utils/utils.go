@@ -1,55 +1,32 @@
 package utils
 
 import (
-	"github.com/kldx/common/conf"
 	"github.com/kldx/common/constants"
 	"github.com/kldx/common/structs"
-	"fmt"
+	"os"
 )
 
 func GetMicroserviceId() string {
-	// TODO now mock，will get from env
-	return "ujpa81"
+	return os.Getenv(constants.EnvMicroSvcID)
 }
 
 func GetAppidAndSecret() (string, string) {
-	// TODO now mock，will get from env
-	return "c_fb79be28fae349ca90c0", "cd8fc6cb3c0a423d985e918e8019ec77"
-}
-
-func GetEnv() string {
-	// TODO now mock，will get from env
-	return "development"
-}
-
-func GetBoeTag() string {
-	// TODO now mock，will get from env
-	return constants.BoeTag
-}
-
-func GetInExtranetTag() string {
-	// TODO now mock，will get from env
-	return constants.IntranetNetTag
+	return os.Getenv(constants.EnvMicroSvcClientID), os.Getenv(constants.EnvMicroSvcClientSecret)
 }
 
 func GetTenant() structs.Tenant {
-	// TODO now mock，will get from env
 	return structs.Tenant{
 		Id:        6187,
-		Name:      "zwx_01",
-		Namespace: "microService__c",
+		Name:      os.Getenv(constants.EnvMicroSvcTenantName),
+		Namespace: os.Getenv(constants.EnvMicroSvcNamespace),
 		Type:      1,
 	}
 }
 
 func GetOpenapiUrl() string {
-	key := fmt.Sprintf("%s:%s:%s", GetEnv(), GetBoeTag(), GetInExtranetTag())
-	url, _ := conf.OpenapiEnvToUrl[key]
-	return url
+	return os.Getenv(constants.EnvOpenApiDomain)
 }
 
 func GetFaasinfraUrl() string {
-	key := fmt.Sprintf("%s:%s:%s", GetEnv(), GetBoeTag(), GetInExtranetTag())
-	url, _ := conf.FaasinfraEnvToUrl[key]
-	return url
+	return os.Getenv(constants.EnvFaaSInfraDomain)
 }

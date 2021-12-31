@@ -26,3 +26,13 @@ const (
 const (
 	HttpHeaderValue_Json = "application/json"
 )
+
+const (
+	EnvMicroSvcID           = "KMicroSvcID"
+	EnvMicroSvcTenantName   = "KMicroSvcTenantName"
+	EnvMicroSvcNamespace    = "KMicroSvcNamespace"
+	EnvMicroSvcClientID     = "KMicroSvcClientID"
+	EnvMicroSvcClientSecret = "KMicroSvcClientSecret"
+	EnvOpenApiDomain        = "KOpenApiDomain"
+	EnvFaaSInfraDomain      = "KFaaSInfraDomain"
+)
