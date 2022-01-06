@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"github.com/kldx/common/constants"
-	"github.com/kldx/common/structs"
+	"github.com/bytedance/kldx-common/constants"
+	"github.com/bytedance/kldx-common/structs"
 	"os"
 )
 

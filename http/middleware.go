@@ -2,10 +2,10 @@ package http
 
 import (
 	"encoding/json"
-	"github.com/kldx/common/constants"
-	"github.com/kldx/common/exceptions"
-	"github.com/kldx/common/structs"
-	"github.com/kldx/common/utils"
+	"github.com/bytedance/kldx-common/constants"
+	"github.com/bytedance/kldx-common/exceptions"
+	"github.com/bytedance/kldx-common/structs"
+	"github.com/bytedance/kldx-common/utils"
 	"net/http"
 	"sync"
 	"sync/atomic"
