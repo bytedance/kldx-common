@@ -9,6 +9,7 @@ import (
 	"github.com/bytedance/kldx-common/exceptions"
 	"github.com/bytedance/kldx-common/structs"
 	"github.com/bytedance/kldx-common/utils"
+	"go.mongodb.org/mongo-driver/bson"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -115,6 +116,24 @@ func (c *HttpClient) PostJson(path string, headers map[string][]string, data int
 		headers = map[string][]string{}
 	}
 	headers[constants.HttpHeaderKey_ContentType] = []string{constants.HttpHeaderValue_Json}
+	return c.doRequest(req, headers, mids)
+}
+
+func (c *HttpClient) PostBson(path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
+	body, err := bson.Marshal(data)
+	if err != nil {
+		return nil, exceptions.InternalError("HttpClient.PostBson failed, err: %v", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.Url+path, bytes.NewReader(body))
+	if err != nil {
+		return nil, exceptions.InternalError("HttpClient.PostBson failed, err: %v", err)
+	}
+
+	if headers == nil {
+		headers = map[string][]string{}
+	}
+	headers[constants.HttpHeaderKey_ContentType] = []string{constants.HttpHeaderValue_Bson}
 	return c.doRequest(req, headers, mids)
 }
 

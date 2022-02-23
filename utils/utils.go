@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/bytedance/kldx-common/constants"
@@ -8,8 +9,8 @@ import (
 	"os"
 )
 
-func GetMicroserviceId() string {
-	return os.Getenv(constants.EnvMicroSvcID)
+func GetServiceId() string {
+	return os.Getenv(constants.EnvKSvcID)
 }
 
 func GetAppidAndSecret() (string, string, error) {
@@ -48,4 +49,20 @@ func GetOpenapiUrl() string {
 
 func GetFaasinfraUrl() string {
 	return os.Getenv(constants.EnvFaaSInfraDomain)
+}
+
+func GetEnv() string {
+	return os.Getenv(constants.EnvKENV)
+}
+
+func Decode(input interface{}, output interface{}) error {
+	bytes, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(bytes, &output); err != nil {
+		return err
+	}
+	return nil
 }

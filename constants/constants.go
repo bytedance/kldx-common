@@ -15,24 +15,26 @@ const (
 )
 
 const (
-	HttpHeaderKey_Tenant         = "Tenant"
-	HttpHeaderKey_User           = "User"
-	HttpHeaderKey_MicroserviceId = "X-Kunlun-MicroService-Id"
-	HttpHeaderKey_Authorization  = "Authorization"
-	HttpHeaderKey_ContentType    = "Content-Type"
-	HttpHeaderKey_Logid          = "X-Tt-Logid"
+	HttpHeaderKey_Tenant        = "Tenant"
+	HttpHeaderKey_User          = "User"
+	HttpHeaderKey_ServiceID     = "X-Kunlun-Service-Id"
+	HttpHeaderKey_Authorization = "Authorization"
+	HttpHeaderKey_ContentType   = "Content-Type"
+	HttpHeaderKey_Logid         = "X-Tt-Logid"
 )
 
 const (
-	HttpHeaderValue_Json     = "application/json"
+	HttpHeaderValue_Json = "application/json"
+	HttpHeaderValue_Bson = "application/bson"
 )
 
 const (
-	EnvMicroSvcID           = "KMicroSvcID"
-	EnvMicroSvcTenantName   = "KMicroSvcTenantName"
-	EnvMicroSvcNamespace    = "KMicroSvcNamespace"
-	EnvMicroSvcClientID     = "KMicroSvcClientID"
-	EnvMicroSvcClientSecret = "KMicroSvcClientSecret"
+	EnvKENV                 = "ENV"
+	EnvKSvcID               = "KSvcID"
+	EnvMicroSvcTenantName   = "KTenantName"
+	EnvMicroSvcNamespace    = "KNamespace"
+	EnvMicroSvcClientID     = "KClientID"
+	EnvMicroSvcClientSecret = "KClientSecret"
 	EnvOpenApiDomain        = "KOpenApiDomain"
 	EnvFaaSInfraDomain      = "KFaaSInfraDomain"
 )

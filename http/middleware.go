@@ -15,8 +15,8 @@ import (
 
 var (
 	appToken           atomic.Value
-	appTokenExpireTime atomic.Value // 单位 s
-	tokenRemainingTime int64 = 1200 // 单位 s，20min
+	appTokenExpireTime atomic.Value        // 单位 s
+	tokenRemainingTime int64        = 1200 // 单位 s，20min
 )
 
 type ReqMiddleWare func(req *http.Request) error
@@ -30,6 +30,23 @@ func AppTokenMiddleware(req *http.Request) error {
 		return err
 	}
 	req.Header.Add(constants.HttpHeaderKey_Authorization, token)
+	return nil
+}
+
+func TenantAndUserMiddleware(req *http.Request) error {
+	if req == nil || req.Header == nil {
+		return nil
+	}
+	req.Header.Add(constants.HttpHeaderKey_Tenant, utils.GetTenant().Name)
+	req.Header.Add(constants.HttpHeaderKey_User, "-1")
+	return nil
+}
+
+func ServiceIDMiddleware(req *http.Request) error {
+	if req == nil || req.Header == nil {
+		return nil
+	}
+	req.Header.Add(constants.HttpHeaderKey_ServiceID, utils.GetServiceId())
 	return nil
 }
 
