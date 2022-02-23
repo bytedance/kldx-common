@@ -1,3 +1,7 @@
 module github.com/bytedance/kldx-common
 
 go 1.16
+
+require (
+	go.mongodb.org/mongo-driver v1.8.3
+)
