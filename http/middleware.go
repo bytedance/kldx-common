@@ -1,16 +1,18 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/bytedance/kldx-common/constants"
-	"github.com/bytedance/kldx-common/exceptions"
-	"github.com/bytedance/kldx-common/structs"
-	"github.com/bytedance/kldx-common/utils"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/bytedance/kldx-common/constants"
+	"github.com/bytedance/kldx-common/exceptions"
+	"github.com/bytedance/kldx-common/structs"
+	"github.com/bytedance/kldx-common/utils"
 )
 
 var (
@@ -25,7 +27,7 @@ func AppTokenMiddleware(req *http.Request) error {
 	if req == nil || req.Header == nil {
 		return nil
 	}
-	token, err := GetAppToken()
+	token, err := GetAppToken(req.Context())
 	if err != nil {
 		return err
 	}
@@ -50,7 +52,7 @@ func ServiceIDMiddleware(req *http.Request) error {
 	return nil
 }
 
-func GetAppToken() (string, error) {
+func GetAppToken(ctx context.Context) (string, error) {
 	// 1.get token from memory
 	token := getAppTokenFromMem()
 	if token != "" {
@@ -58,7 +60,7 @@ func GetAppToken() (string, error) {
 	}
 
 	// 2.get token from remote
-	token, err := refreshAppToken()
+	token, err := refreshAppToken(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -84,7 +86,7 @@ func getAppTokenFromMem() string {
 	return token
 }
 
-func refreshAppToken() (string, error) {
+func refreshAppToken(ctx context.Context) (string, error) {
 	// 1.get lock
 	var lock sync.Mutex
 	lock.Lock()
@@ -106,7 +108,7 @@ func refreshAppToken() (string, error) {
 		"clientSecret": secret,
 	}
 
-	body, err := GetOpenapiClient().PostJson(OpenapiPath_GetToken, nil, data)
+	body, err := GetOpenapiClient().PostJson(ctx, OpenapiPath_GetToken, nil, data)
 	if err != nil {
 		return "", err
 	}

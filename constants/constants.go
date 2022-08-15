@@ -1,5 +1,7 @@
 package constants
 
+import "time"
+
 const (
 	BoeTag         = "boe"
 	IntranetNetTag = "intranet"
@@ -37,4 +39,14 @@ const (
 	EnvMicroSvcClientSecret = "KClientSecret"
 	EnvOpenApiDomain        = "KOpenApiDomain"
 	EnvFaaSInfraDomain      = "KFaaSInfraDomain"
+)
+
+// key in ctx
+const (
+	ApiTimeoutMapKey = "KApiTimeoutMap"
+	ApiTimeoutMethodKey = "KApiTimeoutMap"
+)
+
+const (
+	ApiTimeoutDefault = 12 * time.Second
 )

@@ -5,15 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/bytedance/kldx-common/constants"
-	"github.com/bytedance/kldx-common/exceptions"
-	"github.com/bytedance/kldx-common/structs"
-	"github.com/bytedance/kldx-common/utils"
-	"go.mongodb.org/mongo-driver/bson"
 	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/bytedance/kldx-common/constants"
+	"github.com/bytedance/kldx-common/exceptions"
+	"github.com/bytedance/kldx-common/utils"
 )
 
 type HttpClient struct {
@@ -24,13 +25,6 @@ type HttpClient struct {
 var (
 	openapiClientOnce sync.Once
 	openapiClient     *HttpClient
-
-	openapiClientConf = &structs.HttpConfig{
-		Url:                 utils.GetOpenapiUrl(),
-		MaxIdleConns:        100,
-		MaxIdleConnsPerHost: 10,
-		IdleConnTimeout:     10 * time.Second,
-	}
 )
 
 func GetOpenapiClient() *HttpClient {
@@ -38,18 +32,18 @@ func GetOpenapiClient() *HttpClient {
 		openapiClient = &HttpClient{
 			Client: http.Client{
 				Transport: &http.Transport{
-					MaxIdleConns:        openapiClientConf.MaxIdleConns,
-					MaxIdleConnsPerHost: openapiClientConf.MaxIdleConnsPerHost,
-					IdleConnTimeout:     openapiClientConf.IdleConnTimeout,
+					MaxIdleConns:        100,
+					MaxIdleConnsPerHost: 10,
+					IdleConnTimeout:     10 * time.Second,
 				},
 			},
-			Url: openapiClientConf.Url,
+			Url: utils.GetOpenapiUrl(),
 		}
 	})
 	return openapiClient
 }
 
-func (c *HttpClient) doRequest(req *http.Request, headers map[string][]string, mids []ReqMiddleWare) ([]byte, error) {
+func (c *HttpClient) doRequest(ctx context.Context, req *http.Request, headers map[string][]string, mids []ReqMiddleWare) ([]byte, error) {
 	for _, mid := range mids {
 		err := mid(req)
 		if err != nil {
@@ -64,7 +58,7 @@ func (c *HttpClient) doRequest(req *http.Request, headers map[string][]string, m
 	}
 
 	// timeout
-	ctx, cancel := getTimeoutCtx()
+	ctx, cancel := getTimeoutCtx(ctx)
 	defer cancel()
 
 	resp, err := c.Do(req.WithContext(ctx))
@@ -92,16 +86,16 @@ func (c *HttpClient) doRequest(req *http.Request, headers map[string][]string, m
 	return datas, nil
 }
 
-func (c *HttpClient) Get(path string, headers map[string][]string, mids ...ReqMiddleWare) ([]byte, error) {
+func (c *HttpClient) Get(ctx context.Context, path string, headers map[string][]string, mids ...ReqMiddleWare) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, c.Url+path, nil)
 	if err != nil {
 		return nil, exceptions.InternalError("HttpClient.Get failed, err: %v", err)
 	}
 
-	return c.doRequest(req, headers, mids)
+	return c.doRequest(ctx, req, headers, mids)
 }
 
-func (c *HttpClient) PostJson(path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
+func (c *HttpClient) PostJson(ctx context.Context, path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, exceptions.InternalError("HttpClient.PostJson failed, err: %v", err)
@@ -116,10 +110,10 @@ func (c *HttpClient) PostJson(path string, headers map[string][]string, data int
 		headers = map[string][]string{}
 	}
 	headers[constants.HttpHeaderKey_ContentType] = []string{constants.HttpHeaderValue_Json}
-	return c.doRequest(req, headers, mids)
+	return c.doRequest(ctx, req, headers, mids)
 }
 
-func (c *HttpClient) PostBson(path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
+func (c *HttpClient) PostBson(ctx context.Context, path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
 	body, err := bson.Marshal(data)
 	if err != nil {
 		return nil, exceptions.InternalError("HttpClient.PostBson failed, err: %v", err)
@@ -134,18 +128,18 @@ func (c *HttpClient) PostBson(path string, headers map[string][]string, data int
 		headers = map[string][]string{}
 	}
 	headers[constants.HttpHeaderKey_ContentType] = []string{constants.HttpHeaderValue_Bson}
-	return c.doRequest(req, headers, mids)
+	return c.doRequest(ctx, req, headers, mids)
 }
 
-func (c *HttpClient) PostFormData(path string, headers map[string][]string, body *bytes.Buffer, mids ...ReqMiddleWare) ([]byte, error) {
+func (c *HttpClient) PostFormData(ctx context.Context, path string, headers map[string][]string, body *bytes.Buffer, mids ...ReqMiddleWare) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodPost, c.Url+path, body)
 	if err != nil {
 		return nil, exceptions.InternalError("HttpClient.PostFormData failed, err: %v", err)
 	}
-	return c.doRequest(req, headers, mids)
+	return c.doRequest(ctx, req, headers, mids)
 }
 
-func (c *HttpClient) PatchJson(path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
+func (c *HttpClient) PatchJson(ctx context.Context, path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, exceptions.InternalError("HttpClient.PatchJson failed, err: %v", err)
@@ -160,10 +154,10 @@ func (c *HttpClient) PatchJson(path string, headers map[string][]string, data in
 		headers = map[string][]string{}
 	}
 	headers[constants.HttpHeaderKey_ContentType] = []string{constants.HttpHeaderValue_Json}
-	return c.doRequest(req, headers, mids)
+	return c.doRequest(ctx, req, headers, mids)
 }
 
-func (c *HttpClient) DeleteJson(path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
+func (c *HttpClient) DeleteJson(ctx context.Context, path string, headers map[string][]string, data interface{}, mids ...ReqMiddleWare) ([]byte, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, exceptions.InternalError("HttpClient.DeleteJson failed, err: %v", err)
@@ -178,9 +172,17 @@ func (c *HttpClient) DeleteJson(path string, headers map[string][]string, data i
 		headers = map[string][]string{}
 	}
 	headers[constants.HttpHeaderKey_ContentType] = []string{constants.HttpHeaderValue_Json}
-	return c.doRequest(req, headers, mids)
+	return c.doRequest(ctx, req, headers, mids)
 }
 
-func getTimeoutCtx() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), 10*time.Second)
+func getTimeoutCtx(ctx context.Context) (context.Context, context.CancelFunc) {
+	timeoutMap, ok1 := ctx.Value(constants.ApiTimeoutMapKey).(map[string]int64)
+	method, ok2 := ctx.Value(constants.ApiTimeoutMethodKey).(string)
+	if ok1 && ok2 {
+		timeout, ok := timeoutMap[method]
+		if ok {
+			return context.WithTimeout(ctx, time.Duration(timeout)*time.Millisecond)
+		}
+	}
+	return context.WithTimeout(ctx, constants.ApiTimeoutDefault)
 }
